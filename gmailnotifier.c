@@ -133,12 +133,31 @@ void CleanupCurl(CURL **handle) {
     curl_global_cleanup();
 }
 
+void daemonize () {
+    if (fork() < 0)
+        exit(1);
+    else
+        exit(0);
+
+    if (setsid() < 0)
+        exit(1);
+
+    if (chdir("/") < 0)
+        exit(1);
+
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+}
+
 int main(int argc, char *argv[])
 {
     CURL *easyhandle = NULL;
     unsigned short int failurecount = 0;
     time_t last_update = time(NULL);
     MemoryStruct mem;
+
+    daemonize();
 
     mem.memory = malloc(1);
     mem.size = 0;

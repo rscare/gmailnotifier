@@ -134,17 +134,25 @@ void CleanupCurl(CURL **handle) {
 }
 
 void daemonize () {
-    if (fork() < 0)
+    pid_t pid;
+
+    if (getppid() == 1)
+        return;
+
+    pid = fork();
+    if (pid < 0)
         exit(1);
-    else
+    if (pid > 0)
         exit(0);
 
     if (setsid() < 0)
         exit(1);
 
-    if (chdir("/") < 0)
+    if (chdir("/tmp") < 0)
         exit(1);
+}
 
+void close_std_fds() {
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
@@ -159,12 +167,15 @@ int main(int argc, char *argv[])
 
     daemonize();
 
+    SetupCurl(&easyhandle);
+
+    close_std_fds();
+
     mem.memory = malloc(1);
     mem.size = 0;
 
     SetupSignals();
     SetupSHM();
-    SetupCurl(&easyhandle);
 
     curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, &mem);
 

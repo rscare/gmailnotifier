@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <curl/curl.h>
 #include <gpgme.h>
-#include <time.h>
 #include <libnotify/notify.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -163,7 +162,6 @@ int main(int argc, char *argv[])
 {
     CURL *easyhandle = NULL;
     unsigned short int failurecount = 0, foreground = 0, verbose = 0;
-    time_t last_update = time(NULL);
     MemoryStruct mem;
 
     if (argc > 1) {
@@ -210,8 +208,7 @@ int main(int argc, char *argv[])
                 printf(mem.memory);
                 printf("\n");
             }
-            *new_msgs = notify_New_Emails(mem.memory, URL, *last_update);
-            last_update = time(NULL);
+            *new_msgs = notify_New_Emails(mem.memory, URL);
             free(mem.memory); mem.memory = malloc(sizeof(char)); mem.size = 0;
         }
         else {

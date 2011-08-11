@@ -7,7 +7,9 @@
 #include <libnotify/notify.h>
 #include "gmailxml.h"
 
-void notifyEntry(xmlNode *node, time_t last_update) {
+time_t last_update = 0;
+
+time_t notifyEntry(xmlNode *node) {
     xmlNode *tmp;
     xmlChar *title = NULL, *text = NULL;
     xmlChar *author_name = NULL, *author_email = NULL;
@@ -65,12 +67,16 @@ void notifyEntry(xmlNode *node, time_t last_update) {
         free(notification_title);
         free(notification_summary);
     }
+    return update_time;
 }
 
-unsigned short int notify_New_Emails(const char * str, const char *url, const time_t last_update) {
+unsigned short int notify_New_Emails(const char * str, const char *url) {
     xmlDoc *doc = NULL;
     xmlNode *node = NULL;
     unsigned short int new_msgs = 0;
+    time_t tmptime = 0, largesttime;
+
+    largesttime = last_update;
 
     LIBXML_TEST_VERSION;
 
@@ -98,13 +104,17 @@ unsigned short int notify_New_Emails(const char * str, const char *url, const ti
     }
 
     while (node != NULL) {
-        if (xmlStrcmp(node->name, (const xmlChar *)"entry") == 0)
-            notifyEntry(node, last_update);
+        if (xmlStrcmp(node->name, (const xmlChar *)"entry") == 0) {
+            tmptime = notifyEntry(node);
+            if (tmptime > largesttime)
+                largesttime = tmptime;
+        }
         else if (xmlStrcmp(node->name, (const xmlChar *)"fullcount") == 0)
             new_msgs = (unsigned short int)(atoi((char *)(node->children->content)));
 
         node = node->next;
     }
+    last_update = largesttime;
 
     xmlFreeDoc(doc);
     xmlCleanupParser();

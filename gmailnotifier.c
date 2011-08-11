@@ -161,15 +161,29 @@ void close_std_fds() {
 int main(int argc, char *argv[])
 {
     CURL *easyhandle = NULL;
-    unsigned short int failurecount = 0;
+    unsigned short int failurecount = 0, foreground = 0;
     time_t last_update = time(NULL);
     MemoryStruct mem;
 
-    daemonize();
+    if (argc > 1) {
+        int c;
+        for (c = 1; c < argc; ++c) {
+            if ((strcmp(argv[c], "--help") == 0) || (strcmp(argv[c], "-h") == 0)) {
+                printf("Options: [--foreground|-F]\n");
+                exit(0);
+            }
+            else if ((strcmp(argv[c], "--foreground") == 0) || (strcmp(argv[c], "-F") == 0))
+                foreground = 1;
+        }
+    }
+
+    if (!foreground)
+        daemonize();
 
     SetupCurl(&easyhandle);
 
-    close_std_fds();
+    if (!foreground)
+        close_std_fds();
 
     mem.memory = malloc(1);
     mem.size = 0;

@@ -21,6 +21,7 @@
 #define MAXTRIES 7
 #define NOTIFICATION_SLEEP 180 // How long to wait between notifications
 #define APPNAME "rgmailnotifier"
+#define LOGFILE "gmailnotifier.log"
 
 unsigned short int *new_msgs = NULL, running = 1;
 int shmid = 0;
@@ -161,7 +162,7 @@ void close_std_fds() {
 int main(int argc, char *argv[])
 {
     CURL *easyhandle = NULL;
-    unsigned short int failurecount = 0, foreground = 0;
+    unsigned short int failurecount = 0, foreground = 0, verbose = 0;
     time_t last_update = time(NULL);
     MemoryStruct mem;
 
@@ -169,11 +170,13 @@ int main(int argc, char *argv[])
         int c;
         for (c = 1; c < argc; ++c) {
             if ((strcmp(argv[c], "--help") == 0) || (strcmp(argv[c], "-h") == 0)) {
-                printf("Options: [--foreground|-F]\n");
+                printf("Options: [--foreground|-F] [--verbose|-v]\n");
                 exit(0);
             }
             else if ((strcmp(argv[c], "--foreground") == 0) || (strcmp(argv[c], "-F") == 0))
                 foreground = 1;
+            else if ((strcmp(argv[c], "--verbose") == 0) || (strcmp(argv[c], "-v") == 0))
+                verbose = 1;
         }
     }
 
@@ -185,7 +188,7 @@ int main(int argc, char *argv[])
     if (!foreground)
         close_std_fds();
 
-    mem.memory = malloc(1);
+    mem.memory = malloc(sizeof(char));
     mem.size = 0;
 
     SetupSignals();
@@ -196,16 +199,20 @@ int main(int argc, char *argv[])
     notify_init(APPNAME);
     while (running) {
         while (curl_easy_perform(easyhandle) != 0) {
-            free(mem.memory); mem.memory = malloc(1); mem.size = 0;
+            free(mem.memory); mem.memory = malloc(sizeof(char)); mem.size = 0;
             if (++failurecount == MAXTRIES)
                 break;
             sleep(WAITTIME);
         }
 
         if (failurecount < MAXTRIES) {
-            *new_msgs = notify_New_Emails(mem.memory, URL, last_update);
+            if (verbose) {
+                printf(mem.memory);
+                printf("\n");
+            }
+            *new_msgs = notify_New_Emails(mem.memory, URL, *last_update);
             last_update = time(NULL);
-            free(mem.memory); mem.memory = malloc(1); mem.size = 0;
+            free(mem.memory); mem.memory = malloc(sizeof(char)); mem.size = 0;
         }
         else {
             failurecount = 0;

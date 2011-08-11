@@ -7,8 +7,6 @@
 #include <libnotify/notify.h>
 #include "gmailxml.h"
 
-#define MAIL_NOTIFICATION_ICON "/usr/share/notify-osd/icons/hicolor/scalable/status/notification-message-email.svg"
-
 void notifyEntry(xmlNode *node, time_t last_update) {
     xmlNode *tmp;
     xmlChar *title = NULL, *text = NULL;

@@ -3,6 +3,8 @@ project(gmailnotifier)
 add_executable(gmailnotifier gmailnotifier.c gmailxml.c gmailxml.h)
 add_executable(gmail_new_mails gmail_new_mails.c)
 
+set(CMAKE_BUILD_TYPE Release)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/gpgme")
 
@@ -23,7 +25,7 @@ include_directories(${LIBNOTIFY_INCLUDE_DIR})
 set(GMAILNOTIFIERLIBS ${GMAILNOTIFIERLIBS} ${LIBNOTIFY_LIBRARIES})
 
 # Find rpass
-set(GMAILNOTIFIERLIBS ${GMAILNOTIFIERLIBS} "rpass")
+set(GMAILNOTIFIERLIBS ${GMAILNOTIFIERLIBS} rpass)
 
 # Find curl
 find_package(CURL REQUIRED)

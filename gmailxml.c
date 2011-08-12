@@ -114,7 +114,7 @@ unsigned short int notify_New_Emails(const char * str, const char *url) {
 
         node = node->next;
     }
-    last_update = largesttime;
+    last_update = largesttime + 1;
 
     xmlFreeDoc(doc);
     xmlCleanupParser();

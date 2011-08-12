@@ -181,8 +181,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if ((argc <= 1) || acname == NULL)
+    if ((argc <= 1) || acname == NULL) {
         printf("Usage: %s [OPTIONS] RPASS_ACCOUNT_NAME\n", argv[0]);
+        exit(0);
+    }
 
     if (!foreground)
         daemonize();

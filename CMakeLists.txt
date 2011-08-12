@@ -3,7 +3,9 @@ project(gmailnotifier)
 add_executable(gmailnotifier gmailnotifier.c gmailxml.c gmailxml.h)
 add_executable(gmail_new_mails gmail_new_mails.c)
 
-set(CMAKE_BUILD_TYPE Release)
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif (NOT CMAKE_BUILD_TYPE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/gpgme")

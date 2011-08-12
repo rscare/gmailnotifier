@@ -14,7 +14,6 @@
 #include <libxml/parser.h>
 
 #define URL "https://mail.google.com/mail/feed/atom"
-#define ACNAME "Primary Gmail"
 #define PASSFILE "/home/redscare/.passwords.gpg"
 #define WAITTIME 7 // How long to wait between tries
 #define MAXTRIES 7
@@ -111,7 +110,7 @@ int GetUSERPWD(char **str, const char * const acname) {
     return 0;
 }
 
-void SetupCurl(CURL **handle) {
+void SetupCurl(CURL **handle, const char *acname) {
     char *userpwd = NULL;
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -121,7 +120,7 @@ void SetupCurl(CURL **handle) {
     curl_easy_setopt(*handle, CURLOPT_CONNECTTIMEOUT, 10L);
     curl_easy_setopt(*handle, CURLOPT_URL, URL);
 
-    GetUSERPWD(&userpwd, ACNAME);
+    GetUSERPWD(&userpwd, acname);
     curl_easy_setopt(*handle, CURLOPT_USERPWD, userpwd);
     free(userpwd);
 
@@ -158,30 +157,37 @@ void close_std_fds() {
     close(STDERR_FILENO);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     CURL *easyhandle = NULL;
     unsigned short int failurecount = 0, foreground = 0, verbose = 0;
     MemoryStruct mem;
+    char *acname = NULL;
 
+
+    // Commandline options parsing
     if (argc > 1) {
         int c;
         for (c = 1; c < argc; ++c) {
             if ((strcmp(argv[c], "--help") == 0) || (strcmp(argv[c], "-h") == 0)) {
-                printf("Options: [--foreground|-F] [--verbose|-v]\n");
+                printf("Options: [--foreground|-F] [--verbose|-v] RPASS_ACCOUNT_NAME\n");
                 exit(0);
             }
             else if ((strcmp(argv[c], "--foreground") == 0) || (strcmp(argv[c], "-F") == 0))
                 foreground = 1;
             else if ((strcmp(argv[c], "--verbose") == 0) || (strcmp(argv[c], "-v") == 0))
                 verbose = 1;
+            else
+                acname = argv[c];
         }
     }
+
+    if ((argc <= 1) || acname == NULL)
+        printf("Usage: %s [OPTIONS] RPASS_ACCOUNT_NAME\n", argv[0]);
 
     if (!foreground)
         daemonize();
 
-    SetupCurl(&easyhandle);
+    SetupCurl(&easyhandle, acname);
 
     if (!foreground)
         close_std_fds();
@@ -224,6 +230,4 @@ int main(int argc, char *argv[])
 
     shmdt(new_msgs);
     shmctl(shmid, IPC_RMID, NULL);
-
-    return 0;
 }

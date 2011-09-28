@@ -3,7 +3,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 
-#define SHM_KEY "/home/redscare/.passwords.gpg"
+#define SHM_KEY "/home/redscare/.rpasswords"
 
 int main(int argc, char *argv[])
 {
